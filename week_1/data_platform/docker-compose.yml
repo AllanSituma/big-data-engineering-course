@@ -10,15 +10,6 @@ services:
     networks:
       - app-network
 
-  postgres-redash:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: redash_user
-      POSTGRES_PASSWORD: redash_password
-      POSTGRES_DB: redash_database
-    networks:
-      - app-network
-
   redis:
     image: redis:alpine
     networks:
@@ -46,6 +37,17 @@ services:
       - ./redash_config.env
     ports:
       - "5000:5000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+
+  worker:
+    image: redash/redash:latest
+    env_file:
+      - ./redash_config.env
+    command: scheduler
     depends_on:
       - postgres
       - redis
